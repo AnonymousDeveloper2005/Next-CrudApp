@@ -1,7 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-const url = "http://localhost:3000/api/users";
+const url = process.env.NEXT_PUBLIC_API_URI;
 export const POST = async (formData) => {
   try {
     const response = await axios.post(url, formData);
