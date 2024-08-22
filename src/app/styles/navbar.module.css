@@ -1,0 +1,28 @@
+.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: .5rem;
+    background-color: darkgray;
+    /* background-color: #fff; */
+}
+
+.navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.addBtn {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 10px 15px;
+    margin-left: 10px;
+    border-radius: 0.5rem;
+}

@@ -1,95 +1,91 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
+import styles from "./page.module.css";
+import { DELETE, GET, useRedirect } from "@/utils/actions";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from "react";
 export default function Home() {
+  const [userData, setUserData] = useState([]);
+  const [loading, setLoading] = useState(true); // Initially set to true
+
+  const getUser = async () => {
+    try {
+      setLoading(true); // Set loading to true when the request starts
+      const response = await GET();
+      if (response.success) {
+        setUserData(response.data?.data?.data);
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      toast.error("An error occurred while fetching user data.");
+    } finally {
+      setLoading(false); // Set loading to false after request is completed
+    }
+  };
+  const routeToUrl = useRedirect();
+  
+  const copyId = (id) => {
+    window.navigator.clipboard.writeText(id).then(() => {
+      toast.success("ID copied to clipboard",{
+        autoClose: 400
+      });
+    })
+  }
+  const deleteUser = async (id) => {
+    try {
+      const response = await DELETE(id);
+      if (response.success) {
+        toast.success(response.data);
+        getUser();
+      } else {
+        toast.error(response.data);
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting user.");
+    }
+  }
+  useEffect(() => {
+    getUser();
+  }, []);
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <ToastContainer />
+      <table className={styles.table}>
+        <thead className={styles.thead}>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody className={styles.tbody}>
+          {loading ? (
+            <tr>
+              <td colSpan="3">Loading...</td>
+            </tr>
+          ) : userData.length > 0 ? (
+            userData.map((user) => (
+              <tr key={user._id}>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>
+                  <button onClick={() => routeToUrl(`/update/${user._id}`)} className={styles.edit}>Edit</button>
+                  <button className={styles.del} onClick={() => deleteUser(user._id)}>Delete</button>
+                  {/* add btn for copyid */}
+                  <button onClick={() => copyId(user._id)} className={styles.copy}>Copy ID</button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3">No users found.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </main>
   );
 }
